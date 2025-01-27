@@ -5,7 +5,7 @@ import { createClient, Session } from "@supabase/supabase-js";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Button } from "./components/button";
-import { Card, CardContent, CardHeader, CardTitle } from "./components/card";
+import {  CardContent, CardHeader, CardTitle } from "./components/card";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
@@ -93,6 +93,7 @@ export default function Home() {
       });
       setData(response.data);
     } catch (err) {
+      console.log(err);
       setError("Failed to fetch data. Please try again.");
     } finally {
       setLoading(false);
