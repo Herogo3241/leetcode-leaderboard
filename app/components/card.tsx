@@ -38,7 +38,7 @@ export const Card = ({ children, className = '' }: CardProps) => (
 export const CardHeader = ({ children, className = '' }: { children: React.ReactNode, className?: string }) => (
   <div className="mb-6 relative">
     {/* Subtle header underline effect */}
-    <div className={`absolute bottom-0 left-0 w-1/4 h-px bg-gradient-to-r from-blue-500 to-purple-500 opacity-50 ${className}`}></div>
+    <div className={`absolute bottom-0 left-0 w-1/2 h-px bg-gradient-to-r from-blue-500 to-purple-500 opacity-50 ${className}`}></div>
     {children}
   </div>
 );

@@ -126,77 +126,79 @@ const LeetCodeLogin = () => {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto mt-8 justify-center items-center h-full">
-      <CardHeader>
-        <CardTitle>{isSignUp ? 'Sign Up' : 'Sign In'}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-4">
-          <div>
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          {isSignUp && (
+    <div className="min-h-screen flex justify-center items-center">
+      <Card className="w-full max-w-md mx-auto mt-8 flex justify-center items-center">
+        <CardHeader>
+          <CardTitle>{isSignUp ? 'Sign Up' : 'Sign In'}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-4">
             <div>
               <Input
-                type="text"
-                placeholder="LeetCode Username"
-                value={leetcodeUsername}
-                onChange={(e) => setLeetcodeUsername(e.target.value)}
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
-          )}
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          {successMessage && (
-            <Alert>
-              <AlertDescription>{successMessage}</AlertDescription>
-            </Alert>
-          )}
-          <div className="space-y-2">
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-            >
-              {isSignUp ? 'Sign Up' : 'Sign In'}
-            </Button>
-            <Button
-              type="button"
-              onClick={() => {
-                setIsSignUp(!isSignUp);
-                setError('');
-                setSuccessMessage('');
-              }}
-              className="w-full"
-              variant="outline"
-              disabled={loading}
-            >
-              {isSignUp ? 'Switch to Sign In' : 'Switch to Sign Up'}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+            <div>
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            {isSignUp && (
+              <div>
+                <Input
+                  type="text"
+                  placeholder="LeetCode Username"
+                  value={leetcodeUsername}
+                  onChange={(e) => setLeetcodeUsername(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            {successMessage && (
+              <Alert>
+                <AlertDescription>{successMessage}</AlertDescription>
+              </Alert>
+            )}
+            <div className="space-y-2">
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={loading}
+              >
+                {isSignUp ? 'Sign Up' : 'Sign In'}
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setError('');
+                  setSuccessMessage('');
+                }}
+                className="w-full"
+                variant="outline"
+                disabled={loading}
+              >
+                {isSignUp ? 'Switch to Sign In' : 'Switch to Sign Up'}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
-};
-
+}
+  
 export default LeetCodeLogin;
