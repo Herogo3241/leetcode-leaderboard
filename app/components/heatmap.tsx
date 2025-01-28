@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from './card';
+import { Card } from './card';
 
 interface SubmissionData {
   username: string;
@@ -89,22 +89,22 @@ const SubmissionHeatmap = ({ stats }: HeatmapProps) => {
 
       <div className="relative">
         {/* Month labels */}
-        <div className="flex mb-2">
-          <div className="w-10" /> {/* Spacing for day labels */}
-          {monthNames.map((month) => (
+        <div className="flex mb-2 ml-3">
+          <div className="w-5" /> {/* Spacing for day labels */}
+          {/* {monthNames.map((month) => (
             <div key={month} className="flex-1 text-xs text-gray-500">
               {month}
             </div>
-          ))}
+          ))} */}
         </div>
 
         {/* Day labels and heatmap grid */}
         <div className="flex">
           {/* Day labels */}
           <div className="flex flex-col justify-around mr-2 text-xs text-gray-500">
-            <span>Mon</span>
+            {/* <span>Mon</span>
             <span>Wed</span>
-            <span>Fri</span>
+            <span>Fri</span> */}
           </div>
 
           {/* Heatmap grid */}

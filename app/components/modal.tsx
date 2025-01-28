@@ -120,35 +120,9 @@ const ProblemDistributionChart = ({
           <Legend
             verticalAlign="bottom"
             height={36}
-            formatter={(
-              value:
-                | string
-                | number
-                | bigint
-                | boolean
-                | React.ReactElement<
-                    unknown,
-                    string | React.JSXElementConstructor<any>
-                  >
-                | Iterable<React.ReactNode>
-                | React.ReactPortal
-                | Promise<
-                    | string
-                    | number
-                    | bigint
-                    | boolean
-                    | React.ReactPortal
-                    | React.ReactElement<
-                        unknown,
-                        string | React.JSXElementConstructor<any>
-                      >
-                    | Iterable<React.ReactNode>
-                    | null
-                    | undefined
-                  >
-                | null
-                | undefined
-            ) => <span className="text-sm font-medium">{value}</span>}
+            formatter={(value: any) => (
+              <span className="text-sm font-medium">{value}</span>
+            )}
           />
         </PieChart>
       </ResponsiveContainer>
@@ -157,32 +131,24 @@ const ProblemDistributionChart = ({
 };
 
 function calculateCurrentStreak(stats: string): number {
-  // Parse the stats JSON string into an object
   const parsedStats: Record<string, number> = JSON.parse(stats);
-
-  // Convert the keys (timestamps) into Date objects and sort them in descending order
   const sortedDates = Object.keys(parsedStats)
-    .map((timestamp) => new Date(Number(timestamp) * 1000)) // Convert Unix timestamp to milliseconds
-    .sort((a, b) => b.getTime() - a.getTime()); // Descending order
+    .map((timestamp) => new Date(Number(timestamp) * 1000))
+    .sort((a, b) => b.getTime() - a.getTime());
 
-  // Initialize streak count and check for consecutive dates
   let currentStreak = 0;
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Ignore time for streak calculation
+  today.setHours(0, 0, 0, 0);
 
   for (let i = 0; i < sortedDates.length; i++) {
     const date = sortedDates[i];
     const previousDate = i === 0 ? today : sortedDates[i - 1];
-
-    // Calculate the difference in days
     const diffDays =
       (previousDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
 
-    // If the difference is 1 (consecutive day) or 0 (same day), increment streak
     if (diffDays <= 1) {
       currentStreak++;
     } else {
-      // Break if there is a gap in the streak
       break;
     }
   }
@@ -205,9 +171,9 @@ const UserDetailsModal = ({ user, onClose }: UserDetailsModalProps) => {
       try {
         const response = await axios.post("/api/leetcode-calendar", {
           username: user.username,
-          year: new Date().getFullYear().toString(),
+          year: new Date().getFullYear().toString()
         });
-  
+
         if (response.data) {
           setSubmissions(response.data);
         } else {
@@ -220,20 +186,21 @@ const UserDetailsModal = ({ user, onClose }: UserDetailsModalProps) => {
         setLoading(false);
       }
     };
-  
+
     if (user) {
       fetchData();
     }
   }, [user]);
-  
 
-
-  
-
-  const currentStreak = submissions ? calculateCurrentStreak(submissions.stats) : 0;
+  const currentStreak = submissions
+    ? calculateCurrentStreak(submissions.stats)
+    : 0;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center overflow-y-auto p-4 transition-all duration-300" onClick={onClose}>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center overflow-y-auto p-4 transition-all duration-300"
+      onClick={onClose}
+    >
       <Card className="max-w-2xl w-full rounded-2xl shadow-xl hover:shadow-2xl transform transition-all duration-300 ease-in-out">
         <div onClick={(e) => e.stopPropagation()}>
           <CardHeader>
@@ -250,7 +217,9 @@ const UserDetailsModal = ({ user, onClose }: UserDetailsModalProps) => {
           <CardContent>
             {/* Problem Distribution Chart */}
             <div>
-              <h3 className="text-md font-semibold mb-2">Problem Distribution</h3>
+              <h3 className="text-md font-semibold mb-2">
+                Problem Distribution
+              </h3>
               <ProblemDistributionChart
                 easy={user.easy}
                 medium={user.medium}
@@ -258,7 +227,7 @@ const UserDetailsModal = ({ user, onClose }: UserDetailsModalProps) => {
               />
             </div>
 
-            {/* Submission Heatmap */}
+            {/* Submission Heatmap with Scroll Container */}
             {submissions && (
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -267,9 +236,11 @@ const UserDetailsModal = ({ user, onClose }: UserDetailsModalProps) => {
                     Keep the streak alive! 🔥
                   </div>
                 </div>
-                <SubmissionHeatmap 
-                  stats={submissions.stats}
-                />
+                <div className="overflow-x-auto pb-4 custom-scrollbar">
+                  <div className="min-w-[1200px]">
+                    <SubmissionHeatmap stats={submissions.stats} />
+                  </div>
+                </div>
               </div>
             )}
 
@@ -285,6 +256,6 @@ const UserDetailsModal = ({ user, onClose }: UserDetailsModalProps) => {
       </Card>
     </div>
   );
-}
+};
 
 export default UserDetailsModal;
