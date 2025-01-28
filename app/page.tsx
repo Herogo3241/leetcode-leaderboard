@@ -41,12 +41,19 @@ interface RankedUser {
   rank: number;
 }
 
+
 export default function Home() {
   const [data, setData] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [session, setSession] = useState<Session | null>(null);
   const [selectedUser, setSelectedUser] = useState<RankedUser | null>(null);
+  interface Submission {
+    username: string;
+    stats: string;
+  }
+  
+  const [submissions, setSubmissions] = useState<Submission[] | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -101,6 +108,10 @@ export default function Home() {
       setLoading(false);
     }
   };
+
+  
+
+ 
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();

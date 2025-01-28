@@ -1,7 +1,18 @@
+"use client";
+import { useEffect, useState } from "react";
 import { Button } from "./button";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
-import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip } from "recharts";
-
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  ResponsiveContainer,
+  Tooltip
+} from "recharts";
+import axios from "axios";
+import SubmissionHeatmap from "./heatmap";
+import { Flame } from "lucide-react";
 
 interface RankedUser {
   username: string;
@@ -13,11 +24,15 @@ interface RankedUser {
   rank: number;
 }
 
+interface SubmissionCalendar {
+  username: string;
+  stats: string;
+}
+
 interface UserDetailsModalProps {
   user: RankedUser | null;
   onClose: () => void;
 }
-
 
 const ProblemDistributionChart = ({
   easy,
@@ -50,25 +65,32 @@ const ProblemDistributionChart = ({
     }
   ];
 
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
+  const CustomTooltip = ({
+    active,
+    payload
+  }: {
+    active?: boolean;
+    payload?: any[];
+  }) => {
     if (active && payload && payload.length) {
       const difficulty = payload[0].payload.name;
       const bgColorClass = {
-        'Easy': 'bg-green-50 border-green-200',
-        'Medium': 'bg-yellow-50 border-yellow-200',
-        'Hard': 'bg-red-50 border-red-200'
-      }[difficulty as 'Easy' | 'Medium' | 'Hard'];
+        Easy: "bg-green-50 border-green-200",
+        Medium: "bg-yellow-50 border-yellow-200",
+        Hard: "bg-red-50 border-red-200"
+      }[difficulty as "Easy" | "Medium" | "Hard"];
 
       const textColorClass = {
-        'Easy': 'text-green-600',
-        'Medium': 'text-yellow-600',
-        'Hard': 'text-red-600'
-      }[difficulty as 'Easy' | 'Medium' | 'Hard'];
+        Easy: "text-green-600",
+        Medium: "text-yellow-600",
+        Hard: "text-red-600"
+      }[difficulty as "Easy" | "Medium" | "Hard"];
 
       return (
         <div className={`p-2 rounded-lg shadow-lg border ${bgColorClass}`}>
           <p className={`font-medium ${textColorClass}`}>
-            {difficulty}: {payload[0].payload.value} ({payload[0].payload.percentage}%)
+            {difficulty}: {payload[0].payload.value} (
+            {payload[0].payload.percentage}%)
           </p>
         </div>
       );
@@ -125,7 +147,7 @@ const ProblemDistributionChart = ({
                     | undefined
                   >
                 | null
-                | undefined,
+                | undefined
             ) => <span className="text-sm font-medium">{value}</span>}
           />
         </PieChart>
@@ -134,51 +156,101 @@ const ProblemDistributionChart = ({
   );
 };
 
+function calculateCurrentStreak(stats: string): number {
+  // Parse the stats JSON string into an object
+  const parsedStats: Record<string, number> = JSON.parse(stats);
+
+  // Convert the keys (timestamps) into Date objects and sort them in descending order
+  const sortedDates = Object.keys(parsedStats)
+    .map((timestamp) => new Date(Number(timestamp) * 1000)) // Convert Unix timestamp to milliseconds
+    .sort((a, b) => b.getTime() - a.getTime()); // Descending order
+
+  // Initialize streak count and check for consecutive dates
+  let currentStreak = 0;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Ignore time for streak calculation
+
+  for (let i = 0; i < sortedDates.length; i++) {
+    const date = sortedDates[i];
+    const previousDate = i === 0 ? today : sortedDates[i - 1];
+
+    // Calculate the difference in days
+    const diffDays =
+      (previousDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
+
+    // If the difference is 1 (consecutive day) or 0 (same day), increment streak
+    if (diffDays <= 1) {
+      currentStreak++;
+    } else {
+      // Break if there is a gap in the streak
+      break;
+    }
+  }
+
+  return currentStreak;
+}
+
 const UserDetailsModal = ({ user, onClose }: UserDetailsModalProps) => {
   if (!user) return null;
 
+  const [loading, setLoading] = useState(false);
+  const [submissions, setSubmissions] = useState<SubmissionCalendar | null>(
+    null
+  );
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.post("/api/leetcode-calendar", {
+          username: user.username,
+          year: new Date().getFullYear().toString(),
+        });
+  
+        if (response.data) {
+          setSubmissions(response.data);
+        } else {
+          console.error("Empty response data");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Failed to fetch data. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
+  
+
+
+  
+
+  const currentStreak = submissions ? calculateCurrentStreak(submissions.stats) : 0;
+
   return (
-    <div
-      className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center overflow-y-auto p-4 transition-all duration-300"
-      onClick={onClose}
-    >
-      <Card className="max-w-2xl w-full rounded-3xl shadow-xl hover:shadow-2xl transform transition-all duration-300 ease-in-out">
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center overflow-y-auto p-4 transition-all duration-300" onClick={onClose}>
+      <Card className="max-w-2xl w-full rounded-2xl shadow-xl hover:shadow-2xl transform transition-all duration-300 ease-in-out">
         <div onClick={(e) => e.stopPropagation()}>
           <CardHeader>
-            <CardTitle className="text-4xl font-bold">{user.username.toUpperCase()}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Left section */}
-              <div className="space-y-2">
-                <p className="text-lg font-semibold">
-                  <span className="text-gray-600">Total Solved:</span>{" "}
-                  {user.totalSolved}
-                </p>
-                <p className="text-lg font-semibold">
-                  <span className="text-gray-600">Score:</span> {user.score}
-                </p>
-              </div>
-
-              {/* Right section */}
-              <div className="space-y-2">
-                <p className="text-lg font-semibold text-green-600">
-                  <span className="text-gray-600">Easy:</span> {user.easy}
-                </p>
-                <p className="text-lg font-semibold text-yellow-600">
-                  <span className="text-gray-600">Medium:</span> {user.medium}
-                </p>
-                <p className="text-lg font-semibold text-red-600">
-                  <span className="text-gray-600">Hard:</span> {user.hard}
-                </p>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-2xl">
+                {user.username.toUpperCase()}
+              </CardTitle>
+              <div className="flex items-center gap-2 bg-gradient-to-r from-orange-400 to-red-500 text-white px-4 py-2 rounded-xl">
+                <Flame className="w-5 h-5" />
+                <span className="font-bold">{currentStreak} day streak!</span>
               </div>
             </div>
-
+          </CardHeader>
+          <CardContent>
             {/* Problem Distribution Chart */}
             <div>
-              <h3 className="text-lg font-semibold">
-                Problem Distribution
-              </h3>
+              <h3 className="text-md font-semibold mb-2">Problem Distribution</h3>
               <ProblemDistributionChart
                 easy={user.easy}
                 medium={user.medium}
@@ -186,20 +258,33 @@ const UserDetailsModal = ({ user, onClose }: UserDetailsModalProps) => {
               />
             </div>
 
-            <div className="border-gray-300">
-              <Button
-                onClick={onClose}
-                variant="outline"
-                className="mt-6 w-full py-3 text-xl font-semibold rounded-xl transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 hover:text-white"
-              >
-                Close
-              </Button>
-            </div>
+            {/* Submission Heatmap */}
+            {submissions && (
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-md font-semibold">Activity</h3>
+                  <div className="text-sm text-gray-500">
+                    Keep the streak alive! 🔥
+                  </div>
+                </div>
+                <SubmissionHeatmap 
+                  stats={submissions.stats}
+                />
+              </div>
+            )}
+
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="w-full py-2 text-lg font-semibold rounded-xl transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 hover:text-white"
+            >
+              Close
+            </Button>
           </CardContent>
         </div>
       </Card>
     </div>
   );
-};
+}
 
 export default UserDetailsModal;
