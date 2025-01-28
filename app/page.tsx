@@ -177,7 +177,7 @@ export default function Home() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto overflow-auto">
       <div className="flex justify-between items-center mb-8 mt-10">
         <CardHeader className="p-0">
           <CardTitle className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">

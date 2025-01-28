@@ -21,6 +21,20 @@ body {
 }
 
 
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar in Firefox */
+html {
+  scrollbar-width: none;
+}
+
+/* Allow scrolling on the container */
+.scroll-container {
+  overflow: auto;
+}
+
 @layer utilities {
   .custom-scrollbar {
     scrollbar-width: none; /* Firefox */
