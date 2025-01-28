@@ -5,7 +5,8 @@ import { createClient, Session } from "@supabase/supabase-js";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Button } from "./components/button";
-import {  CardContent, CardHeader, CardTitle } from "./components/card";
+import {CardContent, CardHeader, CardTitle } from "./components/card";
+import UserDetailsModal from "./components/modal";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
@@ -45,6 +46,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [session, setSession] = useState<Session | null>(null);
+  const [selectedUser, setSelectedUser] = useState<RankedUser | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -100,7 +102,6 @@ export default function Home() {
     }
   };
 
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
   };
@@ -139,10 +140,6 @@ export default function Home() {
       }));
   }, [data]);
 
-
-
-  
-
   if (!session) {
     return null;
   }
@@ -153,7 +150,8 @@ export default function Home() {
         <h1 className="text-3xl font-bold mt-10">
           <CardHeader>
             <CardTitle className="text-3xl">Leaderboard</CardTitle>
-          </CardHeader></h1>
+          </CardHeader>
+        </h1>
         <Button onClick={handleSignOut} variant="outline">
           Sign Out
         </Button>
@@ -163,65 +161,69 @@ export default function Home() {
       {error && <p className="text-red-500">{error}</p>}
 
       {rankedUsers.length > 0 && (
-      
-          
-          <CardContent>
-            <table className="min-w-full table-auto border-collapse">
-              <thead>
-                <tr className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                  <th className="border p-4">Rank</th>
-                  <th className="border p-4">Username</th>
-                  <th className="border p-4">Total Solved</th>
-                  <th className="border p-4">Easy</th>
-                  <th className="border p-4">Medium</th>
-                  <th className="border p-4">Hard</th>
-                  <th className="border p-4">Score</th>
+        <CardContent>
+          <table className="min-w-full table-auto border-collapse">
+            <thead>
+              <tr className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                <th className="border p-4">Rank</th>
+                <th className="border p-4">Username</th>
+                <th className="border p-4">Total Solved</th>
+                <th className="border p-4">Easy</th>
+                <th className="border p-4">Medium</th>
+                <th className="border p-4">Hard</th>
+                <th className="border p-4">Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rankedUsers.map((user) => (
+                <tr
+                  key={user.username}
+                  className="hover:bg-gray-800 cursor-pointer"
+                  onClick={() => setSelectedUser(user)}
+                >
+                  <td className="border p-4 text-center">
+                    <span
+                      className={`font-bold inline-block w-8 h-8 rounded-full leading-8 ${
+                        user.rank === 1
+                          ? "bg-yellow-400 text-white"
+                          : user.rank === 2
+                          ? "bg-gray-300 text-white"
+                          : user.rank === 3
+                          ? "bg-amber-600 text-white"
+                          : ""
+                      }`}
+                    >
+                      {user.rank}
+                    </span>
+                  </td>
+                  <td className="border p-4">{user.username}</td>
+                  <td className="border p-4 text-center">{user.totalSolved}</td>
+                  <td className="border p-4 text-center text-green-600">
+                    {user.easy}
+                  </td>
+                  <td className="border p-4 text-center text-yellow-600">
+                    {user.medium}
+                  </td>
+                  <td className="border p-4 text-center text-red-600">
+                    {user.hard}
+                  </td>
+                  <td className="border p-4 text-center font-bold">
+                    {user.score}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {rankedUsers.map((user) => (
-                  <tr key={user.username} className="hover:bg-gray-700 ">
-                    <td className="border p-4 text-center">
-                      <span
-                        className={`font-bold inline-block w-8 h-8 rounded-full leading-8 ${
-                          user.rank === 1
-                            ? "bg-yellow-400 text-white"
-                            : user.rank === 2
-                            ? "bg-gray-300 text-white"
-                            : user.rank === 3
-                            ? "bg-amber-600 text-white"
-                            : ""
-                        }`}
-                      >
-                        {user.rank}
-                      </span>
-                    </td>
-                    <td className="border p-4">{user.username}</td>
-                    <td className="border p-4 text-center">
-                      {user.totalSolved}
-                    </td>
-                    <td className="border p-4 text-center text-green-600">
-                      {user.easy}
-                    </td>
-                    <td className="border p-4 text-center text-yellow-600">
-                      {user.medium}
-                    </td>
-                    <td className="border p-4 text-center text-red-600">
-                      {user.hard}
-                    </td>
-                    <td className="border p-4 text-center font-bold">
-                      {user.score}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <p className="mt-4 text-sm text-gray-600">
-              Score calculation: Easy (×1) + Medium (×2) + Hard (×3)
-            </p>
-          </CardContent>
-     
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-4 text-sm text-gray-600">
+            Score calculation: Easy (×1) + Medium (×2) + Hard (×3)
+          </p>
+        </CardContent>
       )}
+
+      <UserDetailsModal 
+        user={selectedUser} 
+        onClose={() => setSelectedUser(null)} 
+      />
     </div>
   );
 }
